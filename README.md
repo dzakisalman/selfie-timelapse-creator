@@ -79,3 +79,13 @@ pyinstaller build.spec
 ```
 
 The compiled application will be located in the `dist/` directory.
+
+## Download
+
+Don't want to build from source? Scan the QR code below to download the latest pre-built Windows executable directly.
+
+<div align="center">
+  <img src="qr.png" alt="Download QR Code" width="180"/>
+  <br/>
+  <sub>Scan to download <strong>Selfie Timelapse Creator.exe</strong></sub>
+</div>
