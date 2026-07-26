@@ -2,6 +2,12 @@
 
 Selfie Timelapse Creator is a fully offline, privacy-first desktop application built with Python and PySide6 that automatically aligns and renders selfie timelapse videos. It eliminates the manual drudgery of lining up faces in video editing software by leveraging robust face detection and an efficient FFmpeg pipeline.
 
+## Screenshots
+
+| Face Alignment & Zoom | Date & Age Overlay |
+|:---:|:---:|
+| ![Main UI with zoom slider](ss1.png) | ![Date and age overlay preview](ss2.png) |
+
 ## Features
 
 - **Automated Face Alignment**: Automatically detects faces and aligns photos based on either eyes or facial bounding boxes.
