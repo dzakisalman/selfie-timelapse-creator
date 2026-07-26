@@ -23,6 +23,8 @@ class ProjectSettings:
 
     # ── Alignment ─────────────────────────────────────────────────────────
     alignment_mode: Literal["eyes", "face"] = "eyes"
+    zoom_level: float = 1.0          # 0.5 = zoom out max, 1.0 = default, 3.0 = zoom in max
+    zoom_bg_color: Literal["black", "white"] = "black"  # Fill color when zoomed out
 
     # ── Overlay — Date ────────────────────────────────────────────────────
     show_date: bool = False

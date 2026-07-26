@@ -108,6 +108,13 @@ class MainWindow(QMainWindow):
         lay.addWidget(sep)
         lay.addWidget(sub)
         lay.addStretch()
+
+        by = QLabel("by Allen")
+        by.setStyleSheet(
+            "color: #3d4263; font-size: 11px; font-style: italic; background: transparent;"
+        )
+        lay.addWidget(by)
+
         return header
 
     def _build_content(self) -> QSplitter:

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, Qt
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-    QComboBox, QGroupBox, QSizePolicy,
+    QComboBox, QGroupBox, QSizePolicy, QSlider,
 )
 
 from models.project_settings import ProjectSettings
@@ -28,6 +28,12 @@ class SettingsPanel(QWidget):
         ("Eyes  (recommended)", "eyes"),
         ("Face bounding box",   "face"),
     ]
+
+    # Zoom: slider stores integer 50–300 (= 0.50× – 3.00×), step 5
+    _ZOOM_MIN   = 50    # 0.50×
+    _ZOOM_MAX   = 300   # 3.00×
+    _ZOOM_DEF   = 100   # 1.00×
+    _ZOOM_STEP  = 5
 
     def __init__(self, settings: ProjectSettings, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -56,6 +62,46 @@ class SettingsPanel(QWidget):
         for label, _ in self._ALIGNMENT_MODES:
             self.combo_alignment.addItem(label)
         inner.addWidget(self.combo_alignment)
+
+        # ── Zoom Slider ──────────────────────────────────────────────
+        inner.addWidget(self._field_label("Zoom"))
+
+        # Header row: label on left, value on right
+        zoom_header = QHBoxLayout()
+        zoom_header.setContentsMargins(0, 0, 0, 0)
+        lbl_out = QLabel("Zoom Out")
+        lbl_out.setObjectName("mutedLabel")
+        lbl_out.setStyleSheet("color: #636b82; font-size: 11px; background:transparent;")
+        self.lbl_zoom_value = QLabel("1.00×")
+        self.lbl_zoom_value.setStyleSheet(
+            "color: #6c63ff; font-size: 12px; font-weight: 600; background:transparent;"
+        )
+        self.lbl_zoom_value.setAlignment(Qt.AlignmentFlag.AlignRight)
+        lbl_in = QLabel("Zoom In")
+        lbl_in.setObjectName("mutedLabel")
+        lbl_in.setStyleSheet("color: #636b82; font-size: 11px; background:transparent;")
+        zoom_header.addWidget(lbl_out)
+        zoom_header.addStretch()
+        zoom_header.addWidget(self.lbl_zoom_value)
+        zoom_header.addStretch()
+        zoom_header.addWidget(lbl_in)
+        inner.addLayout(zoom_header)
+
+        self.slider_zoom = QSlider(Qt.Orientation.Horizontal)
+        self.slider_zoom.setRange(self._ZOOM_MIN, self._ZOOM_MAX)
+        self.slider_zoom.setSingleStep(self._ZOOM_STEP)
+        self.slider_zoom.setPageStep(self._ZOOM_STEP * 2)
+        self.slider_zoom.setValue(self._ZOOM_DEF)
+        self.slider_zoom.setTickPosition(QSlider.TickPosition.NoTicks)
+        self.slider_zoom.setToolTip("Zoom level (0.50× – 3.00×). Center is always the face/eyes.")
+        inner.addWidget(self.slider_zoom)
+
+        # ── Background fill color ────────────────────────────────────
+        inner.addWidget(self._field_label("Background (zoom out)"))
+        self.combo_bg_color = QComboBox()
+        self.combo_bg_color.addItem("■  Black", "black")
+        self.combo_bg_color.addItem("□  White", "white")
+        inner.addWidget(self.combo_bg_color)
 
         return group
 
@@ -113,6 +159,13 @@ class SettingsPanel(QWidget):
         self.combo_resolution.currentIndexChanged.connect(self._apply_to_settings)
         self.combo_fps.currentIndexChanged.connect(self._apply_to_settings)
         self.combo_frames.currentIndexChanged.connect(self._apply_to_settings)
+        self.slider_zoom.valueChanged.connect(self._on_zoom_changed)
+        self.combo_bg_color.currentIndexChanged.connect(self._apply_to_settings)
+
+    def _on_zoom_changed(self, value: int) -> None:
+        zoom = value / 100.0
+        self.lbl_zoom_value.setText(f"{zoom:.2f}×")
+        self._apply_to_settings()
 
     def _apply_to_settings(self) -> None:
         _, mode = self._ALIGNMENT_MODES[self.combo_alignment.currentIndex()]
@@ -123,6 +176,9 @@ class SettingsPanel(QWidget):
 
         self._settings.fps = self._FPS_OPTIONS[self.combo_fps.currentIndex()]
         self._settings.frames_per_image = self._FRAMES_PER_IMAGE[self.combo_frames.currentIndex()]
+
+        self._settings.zoom_level = self.slider_zoom.value() / 100.0
+        self._settings.zoom_bg_color = self.combo_bg_color.currentData()
 
         # Update hint
         ms = round(self._settings.video_duration_per_image * 1000)
@@ -151,5 +207,17 @@ class SettingsPanel(QWidget):
 
         if s.frames_per_image in self._FRAMES_PER_IMAGE:
             self.combo_frames.setCurrentIndex(self._FRAMES_PER_IMAGE.index(s.frames_per_image))
+
+        # Restore zoom slider
+        zoom_int = int(round(s.zoom_level * 100))
+        zoom_int = max(self._ZOOM_MIN, min(self._ZOOM_MAX, zoom_int))
+        self.slider_zoom.setValue(zoom_int)
+        self.lbl_zoom_value.setText(f"{s.zoom_level:.2f}×")
+
+        # Restore bg color
+        for i in range(self.combo_bg_color.count()):
+            if self.combo_bg_color.itemData(i) == s.zoom_bg_color:
+                self.combo_bg_color.setCurrentIndex(i)
+                break
 
         self._apply_to_settings()

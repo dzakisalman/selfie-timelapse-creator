@@ -7,7 +7,7 @@ from models.face_landmarks import FaceLandmarks
 from strategies.alignment_strategy import AlignmentStrategy
 
 
-# Bounding box wajah mengisi FACE_FILL_RATIO × output_height
+# Bounding box wajah mengisi FACE_FILL_RATIO × output_height (zoom 1.0)
 FACE_FILL_RATIO = 0.65
 
 
@@ -24,6 +24,7 @@ class FaceAlignmentStrategy(AlignmentStrategy):
         self,
         landmarks: FaceLandmarks,
         output_size: tuple[int, int],
+        zoom_level: float = 1.0,
     ) -> np.ndarray:
         out_w, out_h = output_size
 
@@ -35,8 +36,8 @@ class FaceAlignmentStrategy(AlignmentStrategy):
         bbox_cx = bx + bw / 2
         bbox_cy = by + bh / 2
 
-        # ── Scale agar bbox height = FACE_FILL_RATIO × output_height ──
-        scale = (out_h * FACE_FILL_RATIO) / bh
+        # ── Scale agar bbox height = FACE_FILL_RATIO × output_height × zoom ──
+        scale = (out_h * FACE_FILL_RATIO * zoom_level) / bh
 
         # ── Affine: scale only (no rotation), pivot = bbox center ─────
         M = cv2.getRotationMatrix2D((bbox_cx, bbox_cy), 0.0, scale)

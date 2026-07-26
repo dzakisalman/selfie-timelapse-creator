@@ -8,8 +8,8 @@ from models.face_landmarks import FaceLandmarks
 from strategies.alignment_strategy import AlignmentStrategy
 
 
-EYE_Y_RATIO   = 0.37    # Mata berada di 37% dari atas frame
-EYE_DIST_RATIO = 0.18   # Jarak antar mata = 18% dari tinggi frame
+EYE_Y_RATIO    = 0.37   # Mata berada di 37% dari atas frame
+EYE_DIST_RATIO = 0.18   # Jarak antar mata = 18% dari tinggi frame (zoom 1.0)
 
 
 class EyesAlignment(AlignmentStrategy):
@@ -19,7 +19,7 @@ class EyesAlignment(AlignmentStrategy):
 
     Langkah:
     1. Hitung angle dari garis mata horizontal
-    2. Hitung scale agar jarak mata = EYE_DIST_RATIO × output_height
+    2. Hitung scale agar jarak mata = EYE_DIST_RATIO × output_height × zoom_level
     3. Putar + scale dengan pivot di titik tengah mata
     4. Tambah translasi agar titik tengah mata = (W/2, H × EYE_Y_RATIO)
     """
@@ -28,6 +28,7 @@ class EyesAlignment(AlignmentStrategy):
         self,
         landmarks: FaceLandmarks,
         output_size: tuple[int, int],
+        zoom_level: float = 1.0,
     ) -> np.ndarray:
         out_w, out_h = output_size
 
@@ -39,9 +40,9 @@ class EyesAlignment(AlignmentStrategy):
         dy = ry - ly
         angle_deg = math.degrees(math.atan2(dy, dx))
 
-        # ── 2. Scale ──────────────────────────────────────────────────
+        # ── 2. Scale (zoom_level multiplier applied here) ─────────────
         actual_dist  = landmarks.eye_distance
-        desired_dist = out_h * EYE_DIST_RATIO
+        desired_dist = out_h * EYE_DIST_RATIO * zoom_level
         scale = desired_dist / actual_dist if actual_dist > 1.0 else 1.0
 
         # ── 3. Affine matrix (rotation + scale, pivot = eyes midpoint) ─

@@ -38,11 +38,13 @@ class FaceAligner:
         out_w, out_h = settings.width, settings.height
 
         try:
-            M = strategy.compute_matrix(landmarks, (out_w, out_h))
+            M = strategy.compute_matrix(landmarks, (out_w, out_h), settings.zoom_level)
+            fill_color = (255, 255, 255) if settings.zoom_bg_color == "white" else (0, 0, 0)
             aligned = cv2.warpAffine(
                 image, M, (out_w, out_h),
                 flags=cv2.INTER_LANCZOS4,
-                borderMode=cv2.BORDER_REFLECT,
+                borderMode=cv2.BORDER_CONSTANT,
+                borderValue=fill_color,
             )
             return AlignmentResult(transform_matrix=M, aligned_frame=aligned, success=True)
 
