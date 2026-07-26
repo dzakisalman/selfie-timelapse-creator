@@ -1,0 +1,42 @@
+# ── Python & Bytecode ────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ── PyInstaller & Build Folders ──────────────────────────────────────
+build/
+dist/
+*.spec
+!build.spec
+
+# ── Logs & Debug ─────────────────────────────────────────────────────
+*.log
+crash_log.txt
+warn-*.txt
+xref-*.html
+
+# ── Test & Scratch Files ─────────────────────────────────────────────
+run_test.py
+test_*.py
+test_*.spec
+test_images/
+test_photos/
+ffmpeg.zip
+ffmpeg_extract/
+
+# ── Virtual Environments ─────────────────────────────────────────────
+venv/
+env/
+.env
+.venv/
+ENV/
+
+# ── OS & IDE ─────────────────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ── Large Binaries ───────────────────────────────────────────────────
+src/assets/ffmpeg/ffmpeg.exe
+*.exe
